@@ -1,18 +1,38 @@
 import pygame
+import pygame.event
+import pygame.display
+import pygame.image
+import pygame.transform
+import pygame.freetype
 import random
 import os
 
 
 class Game():
-    WIDTH, HEIGHT = 1920, 1080
+    pygame.init()
+    WIDTH, HEIGHT = pygame.display.Info().current_w, pygame.display.Info().current_h
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    TITLE_FONT = pygame.freetype.Font(
+        os.path.join('assets', 'fonts', 'title.ttf'))
+    # Title screen and menu font
 
-    players = set()
+    ROLE_FONT = pygame.freetype.Font(
+        os.path.join('assets', 'fonts', 'role.ttf'))
+    # Displays at the "crewmate/impostor" screen, called VCR OSD Mono
+
+    ARIAL = pygame.freetype.Font(
+        os.path.join('assets', 'fonts', 'text.ttf'))
+    # Used for pretty much everything else
+
+    players = []
 
     def start(self):
-        self.init_window()
+        if self.players == []:
+            raise ValueError('There are no players.')
 
-        random.choice(self.players).imposter = True
+        random.choice(self.players).impostor = True
+
+        self.init_window()
 
         run = True
         while run:
@@ -21,11 +41,17 @@ class Game():
                     run = False
 
     def init_window(self):
-        self.WIN.fill((255, 255, 255))
+        self.WIN.fill((30, 30, 40))
 
         for player in Game.players:
-            self.WIN.blit(player.image, (random.randint(
-                100, self.WIDTH), random.randint(100, self.HEIGHT)))
+            x, y = random.randint(
+                100, self.WIDTH-100), random.randint(100, self.HEIGHT-100)
+
+            self.WIN.blit(player.image, (x, y))
+            nametag = self.ARIAL.render(
+                player.name, size=self.HEIGHT/25, fgcolor=(255, 255, 255))
+            self.WIN.blit(nametag[0], ((x-nametag[1][2] //
+                          2) + (self.WIDTH//19)//2, y-self.HEIGHT/30))
 
         pygame.display.update()
 
@@ -36,7 +62,7 @@ class Game():
             if color == player.color:
                 raise ValueError(f'Color \'{color}\' has already been used.')
 
-        self.players.add(Player(self, name, color))
+        self.players.append(Player(self, name, color))
 
 
 class Player():
@@ -52,7 +78,7 @@ class Player():
         self.impostor = False
 
         self.image = pygame.transform.scale(pygame.image.load(os.path.join(
-            'assets', self.color.lower()+'.png')), (self.game.WIDTH//18, self.game.HEIGHT//10))
+            'assets', 'imgs', self.color.lower()+'.png')), (self.game.WIDTH//19, self.game.HEIGHT//10))
 
     def __repr__(self):
         return f'Player(\'{self.name}\', {self.color}, impostor={self.impostor})'
@@ -68,10 +94,6 @@ class Player():
 if __name__ == '__main__':
     game = Game()
     game.add_player('Bob', 'Blue')
-    game.add_player('Joe', 'Red')
-    game.add_player('Jim', 'Green')
-    game.add_player('Jeff', 'Lime')
-    game.add_player('Sam', 'Yellow')
-    game.add_player('William', 'Purple')
+    game.add_player('Sam', 'Red')
 
     game.start()
