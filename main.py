@@ -1,17 +1,24 @@
-import pygame
-import pygame.event
-import pygame.display
-import pygame.image
 import pygame.transform
 import pygame.freetype
+import pygame.display
+import pygame.image
+import pygame.event
+import pygame.time
+import pygame.key
 import random
 import os
 
 
 class Game():
     pygame.init()
+
     WIDTH, HEIGHT = pygame.display.Info().current_w, pygame.display.Info().current_h
     WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+    FPS = 60
+    # Set this higher for your monitor
+
+    players = []
+
     TITLE_FONT = pygame.freetype.Font(
         os.path.join('assets', 'fonts', 'title.ttf'))
     # Title screen and menu font
@@ -24,34 +31,51 @@ class Game():
         os.path.join('assets', 'fonts', 'text.ttf'))
     # Used for pretty much everything else
 
-    players = []
-
     def start(self):
         if self.players == []:
             raise ValueError('There are no players.')
 
         random.choice(self.players).impostor = True
+        # Set impostor
 
-        self.init_window()
+        YOU = self.players[0]
+        # Multiplayer will come much later
+
+        YOU.x, YOU.y = random.randint(
+            100, self.WIDTH-100), random.randint(100, self.HEIGHT-100)
 
         run = True
+        clock = pygame.time.Clock()
+
         while run:
+            clock.tick(self.FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
 
-    def init_window(self):
-        self.WIN.fill((30, 30, 40))
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w]:
+                YOU.y -= 3
+            if keys[pygame.K_a]:
+                YOU.x -= 3
+            if keys[pygame.K_s]:
+                YOU.y += 3
+            if keys[pygame.K_d]:
+                YOU.x += 3
 
+            self.draw_window()
+
+    def draw_window(self):
         for player in Game.players:
-            x, y = random.randint(
-                100, self.WIDTH-100), random.randint(100, self.HEIGHT-100)
+            self.WIN.fill((30, 30, 40))
 
-            self.WIN.blit(player.image, (x, y))
+            self.WIN.blit(player.image, (player.x, player.y))
+
             nametag = self.ARIAL.render(
                 player.name, size=self.HEIGHT/25, fgcolor=(255, 255, 255))
-            self.WIN.blit(nametag[0], ((x-nametag[1][2] //
-                          2) + (self.WIDTH//19)//2, y-self.HEIGHT/30))
+
+            self.WIN.blit(nametag[0], ((player.x-nametag[1][2] //
+                          2) + (self.WIDTH//19)//2, player.y-self.HEIGHT/30))
 
         pygame.display.update()
 
@@ -94,6 +118,5 @@ class Player():
 if __name__ == '__main__':
     game = Game()
     game.add_player('Bob', 'Blue')
-    game.add_player('Sam', 'Red')
 
     game.start()
