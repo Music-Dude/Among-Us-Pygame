@@ -3,10 +3,9 @@ attempting to remake among us in pygame
 
 ## So far. . .
 - Basic player/game classes
-- Players display on screen (no movement)
+- - Players display on screen with name tags (you can move one)
 
 ## What I'm working on:
-- Name tags
-- Player movement (I'm gonna pretend multiplayer doesn't exist)
+- Buttons (kill, do task, etc)
 
 ###### when the imposter is sus!
