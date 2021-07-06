@@ -1,3 +1,4 @@
+from operator import attrgetter
 import pygame.transform
 import pygame.freetype
 import pygame.display
@@ -7,6 +8,7 @@ import pygame.time
 import pygame.rect
 import pygame.key
 import random
+import math
 import os
 
 
@@ -93,7 +95,7 @@ class Game():
                             if self.sabotage.btn.collidepoint(event.pos):
                                 print('Sabotage clicked')
                             elif self.kill.btn.collidepoint(event.pos):
-                                print('Kill clicked')
+                                self.YOU.kill()
                         else:
                             if self.use.btn.collidepoint(event.pos):
                                 print('Use clicked')
@@ -173,12 +175,18 @@ class Player():
     def __repr__(self):
         return f'Player(\'{self.name}\', {self.color}, impostor={self.impostor})'
 
-    def kill(self, player):
-        if self.impostor:
-            del player
-            return True
-        else:
-            return False
+    def kill(self):
+        nearest = self.get_nearest_player()
+        if nearest:
+            self.game.players.remove(nearest)
+
+    def get_nearest_player(self):
+        ps = self.game.players.copy()
+        ps.remove(self)
+        try:
+            return min(ps, key=lambda p: math.sqrt((self.x-p.x)**2) + ((self.y-p.y)**2))
+        except:
+            return
 
 
 if __name__ == '__main__':
